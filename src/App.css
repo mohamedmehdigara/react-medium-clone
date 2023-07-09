@@ -1,38 +1,179 @@
-.App {
-  text-align: center;
+/* App.css */
+
+/* Body styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f3f3f3;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Header styles */
+header {
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.home-title {
+  font-size: 28px;
+  margin: 0;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.home-description {
+  font-size: 16px;
+  margin-top: 10px;
+  color: #888;
+}
+
+/* Navigation styles */
+nav {
+  background-color: #333;
+}
+
+.navigation-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
-  flex-direction: column;
+}
+
+.navigation-links li {
+  margin-right: 10px;
+}
+
+.navigation-links li a {
+  color: #fff;
+  text-decoration: none;
+  padding: 10px;
+}
+
+/* Home component styles */
+.home-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.articles-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 20px;
+}
+
+.article {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.article-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-right: 20px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.article-details {
+  flex: 1;
+}
+
+.article-title {
+  font-size: 20px;
+  margin: 0;
+}
+
+.article-author {
+  font-size: 14px;
+  margin-top: 5px;
+  color: #888;
+}
+
+.article-summary {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* Article component styles */
+.article-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.article-container h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.article-container p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Topics component styles */
+.topics-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.topics-container h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+/* CreateArticle component styles */
+.create-article-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-article-container h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.create-article-container form {
+  margin-top: 20px;
+}
+
+.create-article-container label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.create-article-container input,
+.create-article-container textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.create-article-container button[type="submit"] {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.create-article-container button[type="submit"]:hover {
+  background-color: #222;
 }
