@@ -6,6 +6,8 @@ import Navigation from './components/Navigation';
 import Topics from './components/Topics';
 import CreateArticle from "./components/CreateArticle";
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Main from './components/Main';
 import './App.css';
 
 
@@ -15,6 +17,8 @@ function App() {
       <div>
         <Navigation />
         <Header/>
+        <Sidebar/>
+        <Main/>
         <Routes>
           <Route exact path="/" element={<Home/>} />
           <Route path="/article/:id" element={<Article/>} />
