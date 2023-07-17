@@ -9,11 +9,66 @@ body {
 }
 
 /* Header styles */
-header {
+
+/* App.css */
+
+.header {
   background-color: #fff;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  fill: #000;
+}
+
+.search-bar {
+  flex: 1;
+  margin: 0 20px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #f5f5f5;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-action {
+  color: #000;
+  text-decoration: none;
+  margin-right: 20px;
+  font-size: 16px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 
 .home-title {
   font-size: 28px;
