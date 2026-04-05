@@ -1,156 +1,197 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router-dom';
+import styled, { createGlobalStyle, ThemeProvider, css } from 'styled-components';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// --- Design System ---
+// --- Medium Design Tokens ---
 const theme = {
   colors: {
-    primary: '#1a8917', // Medium Green
-    text: '#292929',
-    secondary: '#6b6b6b',
-    border: '#f0f0f0',
-    bg: '#ffffff',
-    sidebar: '#fafafa',
+    black: '#242424',
+    white: '#ffffff',
+    gray: '#757575',
+    lightGray: '#f2f2f2',
+    border: '#ebebeb',
+    green: '#1a8917',
+    greenHover: '#156d12',
   },
   fonts: {
-    serif: 'Georgia, Cambria, "Times New Roman", Times, serif',
-    sans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    ui: 'sohne, "Helvetica Neue", Helvetica, Arial, sans-serif',
+    article: 'charter, Georgia, Cambria, "Times New Roman", Times, serif',
   }
 };
 
-// --- Global Reset & Styles ---
+// --- Global Styles (Medium Reset) ---
 const GlobalStyle = createGlobalStyle`
   body {
-    margin: 0;
-    padding: 0;
-    font-family: ${props => props.theme.fonts.sans};
-    background-color: ${props => props.theme.colors.bg};
-    color: ${props => props.theme.colors.text};
+    margin: 0; padding: 0;
+    font-family: ${props => props.theme.fonts.ui};
+    color: ${props => props.theme.colors.black};
+    background: ${props => props.theme.colors.white};
     -webkit-font-smoothing: antialiased;
   }
   * { box-sizing: border-box; }
-  a { text-decoration: none; color: inherit; }
-  button { font-family: inherit; }
+  h2 { font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+  p { line-height: 1.6; }
 `;
 
-// --- Store Logic (Local-First) ---
+// --- Zustand Store ---
 const useStore = create(
   persist(
     (set) => ({
       articles: [
         { 
           id: '1', 
-          title: 'Mastering Deterministic Logic in React', 
-          excerpt: 'How to build complex systems without relying on external APIs...', 
-          content: 'Building local-first applications requires a deep understanding of state machines...', 
-          date: 'Apr 4' 
+          title: 'The Tunisian Tech Ecosystem in 2026', 
+          excerpt: 'Why Tunis is becoming the new hub for React developers...', 
+          content: 'The growth of startups in North Africa has hit an inflection point...',
+          author: 'Dev Master',
+          date: 'Apr 5',
+          readTime: '5 min read'
         },
       ],
       addArticle: (article) => set((state) => ({ 
-        articles: [
-          { 
-            ...article, 
-            id: Date.now().toString(), 
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) 
-          }, 
-          ...state.articles
-        ] 
+        articles: [{ 
+          ...article, 
+          id: Date.now().toString(), 
+          date: 'Apr 5', 
+          author: 'Anonyme',
+          readTime: '4 min read' 
+        }, ...state.articles] 
       })),
     }),
-    { name: 'medium-clone-state' } // Storage Key
+    { name: 'medium-clone-v2' }
   )
 );
 
-// --- Styled Components Library ---
-const Nav = styled.nav`
+// --- Styled Layout Components ---
+const HeaderWrapper = styled.header`
+  height: 75px;
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10vw;
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
+  background: #fff;
   z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10%;
-  height: 65px;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
-  align-items: center;
 `;
 
-const MainLayout = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 80px;
-  max-width: 1100px;
+const MainGrid = styled.main`
+  max-width: 1192px;
   margin: 0 auto;
-  padding: 50px 20px;
+  display: grid;
+  grid-template-columns: 1fr 368px;
+  gap: 64px;
+  padding: 40px 24px;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const Button = styled.button`
-  background: ${props => props.$variant === 'outline' ? 'transparent' : props.theme.colors.primary};
-  color: ${props => props.$variant === 'outline' ? props.theme.colors.text : 'white'};
-  border: ${props => props.$variant === 'outline' ? '1px solid #ccc' : 'none'};
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  &:hover { opacity: 0.8; transform: translateY(-1px); }
+const Sidebar = styled.aside`
+  position: sticky;
+  top: 115px;
+  height: fit-content;
+  @media (max-width: 900px) { display: none; }
 `;
 
-// --- Feature Components ---
+const FooterNav = styled.footer`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid ${props => props.theme.colors.border};
+  
+  a {
+    font-size: 13px;
+    color: ${props => props.theme.colors.gray};
+    text-decoration: none;
+    &:hover { color: #000; }
+  }
+`;
 
-const ArticleCard = React.memo(({ article }) => (
-  <div style={{ marginBottom: '48px' }}>
-    <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center', fontSize: '0.85rem' }}>
-      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#eee' }} />
-      <strong>Senior Dev</strong> · <span style={{ color: '#6b6b6b' }}>{article.date}</span>
-    </div>
-    <Link to={`/article/${article.id}`}>
-      <h2 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', fontWeight: '800', lineHeight: '1.3' }}>{article.title}</h2>
-      <p style={{ color: theme.colors.secondary, lineHeight: '1.5', margin: '0 0 20px 0' }}>{article.excerpt}</p>
-    </Link>
-    <div style={{ display: 'flex', gap: '15px', color: '#6b6b6b', fontSize: '0.8rem', alignItems: 'center' }}>
-      <span style={{ background: '#f2f2f2', padding: '4px 10px', borderRadius: '15px' }}>Development</span>
-      <span>6 min read</span>
-    </div>
-  </div>
-));
+const Button = styled.button`
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  background: ${props => props.$primary ? props.theme.colors.green : 'transparent'};
+  color: ${props => props.$primary ? '#fff' : props.theme.colors.gray};
+  
+  ${props => props.$primary && css`
+    &:hover { background: ${props.theme.colors.greenHover}; }
+  `}
+`;
 
-const Sidebar = () => (
-  <aside style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
-    <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '20px' }}>What we're reading</h3>
-    {[1, 2].map(i => (
-      <div key={i} style={{ marginBottom: '20px' }}>
-        <h4 style={{ margin: '0 0 5px 0', fontSize: '0.9rem' }}>Building the next generation of web apps</h4>
-        <small style={{ color: '#6b6b6b' }}>John Doe in Tunisia Tech</small>
+// --- UI Features ---
+
+const Header = () => {
+  const location = useLocation();
+  const isCreate = location.pathname === '/create';
+
+  return (
+    <HeaderWrapper>
+      <Link to="/" style={{ fontSize: '28px', fontWeight: '800', letterSpacing: '-1.5px' }}>Medium</Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        {!isCreate && <Link to="/create" style={{ color: theme.colors.gray, fontSize: '14px' }}>Write</Link>}
+        <Button>Sign In</Button>
+        <Button $primary>{isCreate ? 'Publish' : 'Get Started'}</Button>
       </div>
-    ))}
-    <div style={{ borderTop: '1px solid #eee', marginTop: '30px', paddingTop: '20px' }}>
-      <p style={{ fontSize: '0.75rem', color: '#999', lineHeight: '2' }}>
-        Help · Status · About · Careers · Blog · Privacy · Terms
-      </p>
+    </HeaderWrapper>
+  );
+};
+
+const ArticleCard = ({ article }) => (
+  <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '13px', marginBottom: '8px' }}>
+        <strong>{article.author}</strong> · <span style={{ color: theme.colors.gray }}>{article.date}</span>
+      </div>
+      <Link to={`/article/${article.id}`}>
+        <h2 style={{ fontSize: '20px', margin: '0 0 4px 0' }}>{article.title}</h2>
+        <p style={{ fontSize: '15px', color: theme.colors.gray, margin: '0 0 12px 0', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          {article.excerpt}
+        </p>
+      </Link>
+      <div style={{ display: 'flex', gap: '10px', fontSize: '13px', color: theme.colors.gray }}>
+        <span style={{ background: theme.colors.lightGray, padding: '2px 8px', borderRadius: '10px' }}>Technology</span>
+        <span>{article.readTime}</span>
+      </div>
     </div>
-  </aside>
+    <div style={{ width: '112px', height: '112px', background: '#f2f2f2', borderRadius: '2px' }} />
+  </div>
 );
 
-// --- Page Views ---
+// --- Pages ---
 
 const Home = () => {
   const articles = useStore(state => state.articles);
   return (
-    <MainLayout>
-      <section>
+    <MainGrid>
+      <div>
         {articles.map(art => <ArticleCard key={art.id} article={art} />)}
-      </section>
-      <Sidebar />
-    </MainLayout>
+      </div>
+      <Sidebar>
+        <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Staff Picks</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i}>
+              <div style={{ fontSize: '12px' }}><strong>User {i}</strong></div>
+              <div style={{ fontSize: '14px', fontWeight: '700' }}>The future of engineering in Tunis</div>
+            </div>
+          ))}
+        </div>
+        <FooterNav>
+          <a href="#">Help</a><a href="#">Status</a><a href="#">About</a>
+          <a href="#">Careers</a><a href="#">Blog</a><a href="#">Privacy</a>
+        </FooterNav>
+      </Sidebar>
+    </MainGrid>
   );
 };
 
@@ -159,35 +200,29 @@ const CreateArticle = () => {
   const addArticle = useStore(state => state.addArticle);
   const [form, setForm] = useState({ title: '', content: '' });
 
-  const handlePublish = useCallback((e) => {
-    e.preventDefault();
-    if (!form.title.trim() || !form.content.trim()) return;
-    
-    addArticle({
-      ...form,
-      excerpt: form.content.substring(0, 140) + '...'
-    });
+  // Handle the publish button that is logically in the header
+  const handlePublish = useCallback(() => {
+    if (!form.title) return;
+    addArticle({ ...form, excerpt: form.content.substring(0, 150) + '...' });
     navigate('/');
   }, [form, addArticle, navigate]);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '80px auto', padding: '0 20px' }}>
-      <form onSubmit={handlePublish}>
-        <input 
-          autoFocus
-          placeholder="Title" 
-          value={form.title}
-          onChange={e => setForm({ ...form, title: e.target.value })}
-          style={{ width: '100%', border: 'none', outline: 'none', fontSize: '3rem', marginBottom: '30px', fontFamily: theme.fonts.serif }}
-        />
-        <textarea 
-          placeholder="Tell your story..." 
-          value={form.content}
-          onChange={e => setForm({ ...form, content: e.target.value })}
-          style={{ width: '100%', border: 'none', outline: 'none', fontSize: '1.3rem', minHeight: '400px', resize: 'none', lineHeight: '1.7' }}
-        />
-        <Button type="submit" style={{ position: 'fixed', top: '15px', right: '10%', zIndex: '1100' }}>Publish</Button>
-      </form>
+    <div style={{ maxWidth: '740px', margin: '40px auto', padding: '0 24px' }}>
+      <input 
+        placeholder="Title" 
+        onChange={e => setForm({...form, title: e.target.value})}
+        style={{ width: '100%', border: 'none', fontSize: '42px', outline: 'none', fontFamily: theme.fonts.article, marginBottom: '20px' }}
+      />
+      <textarea 
+        placeholder="Tell your story..." 
+        onChange={e => setForm({...form, content: e.target.value})}
+        style={{ width: '100%', border: 'none', fontSize: '21px', outline: 'none', fontFamily: theme.fonts.article, minHeight: '400px', resize: 'none' }}
+      />
+      {/* Hidden trigger for header publish button - in a real app, use the store to trigger this */}
+      <div style={{ position: 'fixed', top: '18px', right: '10vw', zIndex: '2000' }}>
+         <Button $primary onClick={handlePublish}>Publish</Button>
+      </div>
     </div>
   );
 };
@@ -195,20 +230,19 @@ const CreateArticle = () => {
 const ArticleDetail = () => {
   const { id } = useParams();
   const article = useStore(state => state.articles.find(a => a.id === id));
-
-  if (!article) return <div style={{ textAlign: 'center', padding: '100px' }}>Story not found.</div>;
+  if (!article) return <div style={{ padding: '100px', textAlign: 'center' }}>Story not found.</div>;
 
   return (
-    <article style={{ maxWidth: '700px', margin: '70px auto', padding: '0 24px' }}>
-      <h1 style={{ fontSize: '2.8rem', marginBottom: '20px', fontFamily: theme.fonts.serif, lineHeight: '1.2' }}>{article.title}</h1>
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', alignItems: 'center' }}>
-        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#eee' }} />
+    <article style={{ maxWidth: '680px', margin: '50px auto', padding: '0 24px' }}>
+      <h1 style={{ fontSize: '42px', fontFamily: theme.fonts.article, marginBottom: '20px', lineHeight: '1.2' }}>{article.title}</h1>
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '35px', alignItems: 'center' }}>
+        <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#f2f2f2' }} />
         <div>
-          <div style={{ fontWeight: '600' }}>Senior Developer</div>
-          <div style={{ fontSize: '0.85rem', color: '#6b6b6b' }}>{article.date} · 12 min read</div>
+          <div style={{ fontSize: '16px' }}>{article.author}</div>
+          <div style={{ fontSize: '14px', color: theme.colors.gray }}>{article.date} · {article.readTime}</div>
         </div>
       </div>
-      <p style={{ fontSize: '1.3rem', lineHeight: '1.8', color: '#292929', whiteSpace: 'pre-wrap' }}>
+      <p style={{ fontSize: '21px', fontFamily: theme.fonts.article, lineHeight: '1.6', color: '#292929', whiteSpace: 'pre-wrap' }}>
         {article.content}
       </p>
     </article>
@@ -221,15 +255,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <GlobalStyle />
-        <Nav>
-          <Link to="/" style={{ fontSize: '1.8rem', fontWeight: '800', fontFamily: theme.fonts.serif, letterSpacing: '-1px' }}>Medium</Link>
-          <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-            <Link to="/create" style={{ color: theme.colors.secondary, fontSize: '0.9rem' }}>Write</Link>
-            <Button $variant="outline">Sign In</Button>
-            <Button>Get Started</Button>
-          </div>
-        </Nav>
-        
+        <Header />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/article/:id" element={<ArticleDetail />} />
